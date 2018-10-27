@@ -1,0 +1,10 @@
+D:\17.11.1012\ado\Latian\Crud\bin\Debug\Crud.exe.config
+D:\17.11.1012\ado\Latian\Crud\bin\Debug\Crud.exe
+D:\17.11.1012\ado\Latian\Crud\bin\Debug\Crud.pdb
+D:\17.11.1012\ado\Latian\Crud\obj\Debug\Crud.csprojResolveAssemblyReference.cache
+D:\17.11.1012\ado\Latian\Crud\obj\Debug\Crud.Form1.resources
+D:\17.11.1012\ado\Latian\Crud\obj\Debug\Crud.Properties.Resources.resources
+D:\17.11.1012\ado\Latian\Crud\obj\Debug\Crud.csproj.GenerateResource.Cache
+D:\17.11.1012\ado\Latian\Crud\obj\Debug\Crud.exe
+D:\17.11.1012\ado\Latian\Crud\obj\Debug\Crud.pdb
+D:\17.11.1012\ado\Latian\Crud\bin\Debug\DbPerpustakaan.mdb

@@ -1,0 +1,254 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.IO;
+using System.Data.OleDb;
+
+namespace Crud
+{
+    public partial class Form1 : Form
+    {
+        private OleDbConnection _conn;
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        private void btnTestKoneksi_Click(object sender, EventArgs e)
+        {
+            var dbName = Directory.GetCurrentDirectory() + "\\DbPerpustakaan.mdb";
+            var connectionString = string.Format("Provider=Microsoft.Jet.OLEDB.4.0;Data Source={0}", dbName);
+            _conn = GetOpenConnection(connectionString);
+            if (_conn.State == ConnectionState.Open)
+            {
+                MessageBox.Show("Koneksi ke database berhasil !", "Informasi", MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+            }
+            else
+                MessageBox.Show("Koneksi ke database gagal !!!", "Informasi", MessageBoxButtons.OK,
+                MessageBoxIcon.Exclamation);
+        }
+        private OleDbConnection GetOpenConnection(string connectionString)
+        {
+            OleDbConnection conn = null;
+            try
+            {
+                conn = new OleDbConnection(connectionString);
+                conn.Open();
+            }
+            catch
+            {
+            }
+            return conn;
+        }
+
+        private void tabPage1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnCreate_Click(object sender, EventArgs e)
+        {
+            var result = 0;
+            // validasi npm harus diisi
+            if (!mskNpm1.MaskFull)
+            {
+                MessageBox.Show("NPM harus diisi !!!", "Informasi", MessageBoxButtons.OK,
+                MessageBoxIcon.Exclamation);
+                mskNpm1.Focus();
+                return;
+            }
+            // validasi nama harus diisi
+            if (txtNama1.Text.Length == 0)
+            {
+                MessageBox.Show("Nama harus diisi !!!", "Informasi", MessageBoxButtons.OK,
+                MessageBoxIcon.Exclamation);
+                txtNama1.Focus();
+                return;
+            }
+            var sql = @"insert into mahasiswa (npm, nama, angkatan)
+values (@npm, @nama, @angkatan)";
+            using (var cmd = new OleDbCommand(sql, _conn))
+            {
+                cmd.Parameters.AddWithValue("@npm", mskNpm1.Text);
+                cmd.Parameters.AddWithValue("@nama", txtNama1.Text);
+                cmd.Parameters.AddWithValue("@angkatan", txtAngkatan1.Text);
+                result = cmd.ExecuteNonQuery();
+            }
+            if (result > 0)
+            {
+                MessageBox.Show("Data mahasiswa berhasil disimpan !", "Informasi", MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+                // reset form
+                mskNpm1.Clear();
+                txtNama1.Clear();
+                txtAngkatan1.Clear();
+                mskNpm1.Focus();
+            }
+            else
+                MessageBox.Show("Data mahasiswa gagal disimpan !!!", "Informasi", MessageBoxButtons.OK,
+                MessageBoxIcon.Exclamation);
+        }
+
+        private void btnTampilkanData_Click(object sender, EventArgs e)
+        {
+            lstMahasiswa.Items.Clear();
+            var sql = @"select npm, nama, angkatan
+from mahasiswa
+order by nama";
+            using (var cmd = new OleDbCommand(sql, _conn))
+            {
+                using (var dtr = cmd.ExecuteReader())
+                {
+                    var noUrut = 1;
+                    while (dtr.Read())
+                    {
+                        var data = string.Format("{0}. {1}, {2}, {3}",
+                        noUrut, dtr["npm"].ToString(), dtr["nama"].ToString(),
+                        dtr["angkatan"].ToString());
+                        lstMahasiswa.Items.Add(data);
+                        noUrut++;
+                    }
+                }
+            }
+        }
+
+        private void btnCari1_Click(object sender, EventArgs e)
+        {
+            var sql = @"select npm, nama, angkatan
+from mahasiswa
+where npm = @npm";
+            using (var cmd = new OleDbCommand(sql, _conn))
+            {
+                cmd.Parameters.AddWithValue("@npm", mskNpm2.Text);
+                using (var dtr = cmd.ExecuteReader())
+                {
+                    if (dtr.Read())
+                    {
+                        mskNpm2.Text = dtr["npm"].ToString();
+                        txtNama2.Text = dtr["nama"].ToString();
+                        txtAngkatan2.Text = dtr["angkatan"].ToString();
+                    }
+                    else
+                        MessageBox.Show("Data mahasiswa tidak ditemukan !", "Informasi", MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
+                }
+            }
+        }
+
+        private void btnUpdate_Click(object sender, EventArgs e)
+        {
+            var result = 0;
+            // validasi npm harus diisi
+            if (!mskNpm2.MaskFull)
+            {
+                MessageBox.Show("NPM harus !!!", "Informasi", MessageBoxButtons.OK,
+                MessageBoxIcon.Exclamation);
+                mskNpm2.Focus();
+                return;
+            }
+            // validasi nama harus diisi
+            if (txtNama2.Text.Length == 0)
+            {
+                MessageBox.Show("Nama harus !!!", "Informasi", MessageBoxButtons.OK,
+                MessageBoxIcon.Exclamation);
+                txtNama2.Focus();
+                return;
+            }
+            var sql = @"update mahasiswa set nama = @nama, angkatan = @angkatan
+where npm = @npm";
+            using (var cmd = new OleDbCommand(sql, _conn))
+            {
+                cmd.Parameters.AddWithValue("@nama", txtNama2.Text);
+                cmd.Parameters.AddWithValue("@angkatan", txtAngkatan2.Text);
+                cmd.Parameters.AddWithValue("@npm", mskNpm2.Text);
+                result = cmd.ExecuteNonQuery();
+            }
+            if (result > 0)
+            {
+                MessageBox.Show("Data mahasiswa berhasil diupdate !", "Informasi", MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+                // reset form
+                mskNpm2.Clear();
+                txtNama2.Clear();
+                txtAngkatan2.Clear();
+                mskNpm2.Focus();
+            }
+            else
+                MessageBox.Show("Data mahasiswa gagal diupdate !!!", "Informasi", MessageBoxButtons.OK,
+                MessageBoxIcon.Exclamation);
+        }
+
+        private void btnCari2_Click(object sender, EventArgs e)
+        {
+            var sql = @"select npm, nama, angkatan
+from mahasiswa
+where npm = @npm";
+            using (var cmd = new OleDbCommand(sql, _conn))
+            {
+                cmd.Parameters.AddWithValue("@npm", mskNpm3.Text);
+                using (var dtr = cmd.ExecuteReader())
+                {
+                    if (dtr.Read())
+                    {
+                        mskNpm3.Text = dtr["npm"].ToString();
+                        txtNama3.Text = dtr["nama"].ToString();
+                        txtAngkatan3.Text = dtr["angkatan"].ToString();
+                    }
+                    else
+                        MessageBox.Show("Data mahasiswa tidak ditemukan !", "Informasi", MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
+                }
+            }
+        }
+
+        private void btnHapus_Click(object sender, EventArgs e)
+        {
+            var result = 0;
+            // validasi npm harus diisi
+            if (!mskNpm3.MaskFull)
+            {
+                MessageBox.Show("NPM harus !!!", "Informasi", MessageBoxButtons.OK,
+                MessageBoxIcon.Exclamation);
+                mskNpm3.Focus();
+                return;
+            }
+            // validasi nama harus diisi
+            if (txtNama3.Text.Length == 0)
+            {
+                MessageBox.Show("Nama harus !!!", "Informasi", MessageBoxButtons.OK,
+                MessageBoxIcon.Exclamation);
+                txtNama2.Focus();
+                return;
+            }
+            var sql = @"delete mahasiswa set nama = @nama, angkatan = @angkatan
+where npm = @npm";
+            using (var cmd = new OleDbCommand(sql, _conn))
+            {
+                cmd.Parameters.AddWithValue("@nama", txtNama3.Text);
+                cmd.Parameters.AddWithValue("@angkatan", txtAngkatan3.Text);
+                cmd.Parameters.AddWithValue("@npm", mskNpm3.Text);
+                result = cmd.ExecuteNonQuery();
+            }
+            if (result > 0)
+            {
+                MessageBox.Show("Data mahasiswa berhasil Didelete !", "Informasi", MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+                // reset form
+                mskNpm2.Clear();
+                txtNama2.Clear();
+                txtAngkatan2.Clear();
+                mskNpm2.Focus();
+            }
+            else
+                MessageBox.Show("Data mahasiswa gagal Didelete !!!", "Informasi", MessageBoxButtons.OK,
+                MessageBoxIcon.Exclamation);
+        }
+    }
+}
